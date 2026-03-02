@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CiroTop — Slots Streamer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-deep: #0a1a0f;
+    --green-dark: #0f2418;
+    --green-mid: #1a4028;
+    --green-accent: #2a7a45;
+    --green-bright: #3dba6a;
+    --gold: #d4af37;
+    --gold-light: #f0d060;
+    --gold-dim: #8a6f1a;
+    --cream: #f5f0e8;
+    --white: #ffffff;
+    --text-muted: #7a9a80;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--green-deep);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 48px;
+    background: linear-gradient(180deg, rgba(10,26,15,0.98) 0%, transparent 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+  }
+
+  .nav-logo span { color: var(--green-bright); -webkit-text-fill-color: var(--green-bright); }
+
+  .nav-links { display: flex; gap: 8px; }
+
+  .nav-links button {
+    background: none;
+    border: none;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .nav-links button:hover, .nav-links button.active {
+    background: rgba(212,175,55,0.12);
+    color: var(--gold-light);
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+
+  .nav-links button { border: 1px solid transparent; }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ══════════════════════════════════════
+     PAGE 1 — HOME
+  ══════════════════════════════════════ */
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 48px 60px;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(42,122,69,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(212,175,55,0.08) 0%, transparent 60%),
+      linear-gradient(180deg, var(--green-deep) 0%, var(--green-dark) 100%);
+  }
+
+  /* Floating chips bg */
+  .chips-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .chip {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid;
+    opacity: 0.06;
+    animation: floatChip linear infinite;
+  }
+
+  @keyframes floatChip {
+    0% { transform: translateY(110vh) rotate(0deg); }
+    100% { transform: translateY(-20vh) rotate(720deg); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .hero-left {}
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 24px;
+  }
+
+  .hero-badge::before { content: '♠'; font-size: 0.9rem; }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 0.95;
+    margin-bottom: 16px;
+  }
+
+  .hero-title .name {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+  }
+
+  .hero-title .subtitle-word {
+    color: var(--green-bright);
+    font-style: italic;
+    font-size: 0.6em;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin: 24px 0 36px;
+    max-width: 440px;
+  }
+
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: var(--green-deep);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-primary:hover::after { opacity: 1; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,175,55,0.4); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 13px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--green-bright);
+    color: var(--green-bright);
+    transform: translateY(-2px);
+  }
+
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  /* Live stream card */
+  .stream-card {
+    width: 100%;
+    background: var(--green-dark);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stream-preview {
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stream-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(42,122,69,0.05) 20px,
+      rgba(42,122,69,0.05) 40px
+    );
+  }
+
+  .slots-icon {
+    font-size: 5rem;
+    filter: drop-shadow(0 0 20px rgba(61,186,106,0.5));
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(61,186,106,0.5)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(61,186,106,0.8)); }
+  }
+
+  .live-badge-card {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #e53e3e;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .stream-info {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .stream-info-left { font-size: 0.85rem; }
+  .stream-info-left strong { color: var(--gold-light); display: block; font-size: 0.95rem; }
+  .stream-info-left span { color: var(--text-muted); }
+
+  .kick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #53fc18;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .kick-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(83,252,24,0.4); }
+
+  /* Social links */
+  .socials-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .social-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--cream);
+    text-decoration: none;
+    transition: all 0.3s;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .social-pill:hover {
+    background: rgba(212,175,55,0.1);
+    border-color: rgba(212,175,55,0.4);
+    color: var(--gold-light);
+    transform: translateY(-2px);
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .stat-item {
+    background: var(--green-dark);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--gold-light);
+    letter-spacing: 2px;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── SPONSORS SECTION ── */
+  .sponsors-section {
+    padding: 80px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-tag {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    margin-bottom: 12px;
+  }
+
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .sponsors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .sponsor-card {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+  }
+
+  .sponsor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--green-bright));
+  }
+
+  .sponsor-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(212,175,55,0.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.1);
+  }
+
+  .sponsor-logo-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .sponsor-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sponsor-tag {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: rgba(61,186,106,0.15);
+    color: var(--green-bright);
+    border: 1px solid rgba(61,186,106,0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .sponsor-promo {
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .sponsor-promo-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .sponsor-promo-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cream);
+  }
+
+  .sponsor-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+
+  .code-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .code-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: var(--gold-light);
+  }
+
+  .copy-btn {
+    background: rgba(212,175,55,0.15);
+    border: 1px solid rgba(212,175,55,0.3);
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .copy-btn:hover { background: rgba(212,175,55,0.25); }
+
+  .sponsor-cta-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: var(--green-deep);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .sponsor-cta-btn:hover {
+    box-shadow: 0 6px 20px rgba(212,175,55,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ══════════════════════════════════════
+     PAGE 2 — LEADERBOARDS
+  ══════════════════════════════════════ */
+
+  .page-header {
+    padding: 120px 48px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(42,122,69,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .page-header-tag {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .page-header-tag::before, .page-header-tag::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: rgba(212,175,55,0.4);
+  }
+
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    margin-bottom: 12px;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .leaderboard-section {
+    padding: 20px 48px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .casino-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .casino-tab {
+    background: var(--green-dark);
+    border: 1px solid rgba(212,175,55,0.15);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+  }
+
+  .casino-tab.active {
+    background: rgba(212,175,55,0.12);
+    border-color: rgba(212,175,55,0.4);
+    color: var(--gold-light);
+  }
+
+  .leaderboard-card {
+    background: var(--green-dark);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .lb-header {
+    background: linear-gradient(135deg, var(--green-mid), rgba(42,122,69,0.3));
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .lb-header-left h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--gold-light);
+  }
+
+  .lb-header-left p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+  .lb-prize-pool {
+    text-align: right;
+  }
+
+  .lb-prize-pool .amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--gold-light);
+    letter-spacing: 2px;
+  }
+
+  .lb-prize-pool .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .lb-cols {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 100px;
+    padding: 10px 28px;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .lb-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 100px;
+    padding: 16px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .lb-row:hover { background: rgba(212,175,55,0.04); }
+
+  .lb-row:last-child { border-bottom: none; }
+
+  .lb-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+  }
+
+  .rank-1 { color: var(--gold-light); }
+  .rank-2 { color: #c0c0c0; }
+  .rank-3 { color: #cd7f32; }
+  .rank-other { color: var(--text-muted); font-size: 1rem; }
+
+  .lb-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .player-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-accent), var(--green-mid));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: 2px solid rgba(212,175,55,0.2);
+  }
+
+  .rank-1-row .player-avatar { border-color: var(--gold); }
+
+  .player-name { font-weight: 600; font-size: 0.95rem; }
+  .player-bets { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .lb-wagered {
+    font-weight: 600;
+    color: var(--green-bright);
+  }
+
+  .lb-prize {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+    text-align: right;
+  }
+
+  .lb-footer {
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(212,175,55,0.1);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .lb-footer-timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .timer-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--green-bright);
+    letter-spacing: 2px;
+  }
+
+  .my-rank-banner {
+    background: rgba(61,186,106,0.08);
+    border: 1px solid rgba(61,186,106,0.2);
+    border-radius: 8px;
+    padding: 16px 28px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .my-rank-banner .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .my-rank-banner .value { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--green-bright); letter-spacing: 2px; }
+
+  /* ══════════════════════════════════════
+     PAGE 3 — SLOT STRIP ROULETTE
+  ══════════════════════════════════════ */
+
+  .roulette-section {
+    padding: 20px 48px 80px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Odds toggle button */
+  .odds-toggle-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+
+  .odds-toggle-btn {
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.25);
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .odds-toggle-btn:hover {
+    background: rgba(212,175,55,0.16);
+    border-color: rgba(212,175,55,0.5);
+  }
+
+  /* Odds panel (hidden by default) */
+  .odds-panel {
+    display: none;
+    background: var(--green-dark);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    animation: fadeSlideIn 0.25s ease;
+  }
+
+  .odds-panel.visible { display: block; }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .odds-panel-title {
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .odds-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .odds-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .odds-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .odds-label { font-weight: 700; font-size: 0.95rem; }
+  .odds-pct   { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+
+  /* ── SLOT STRIP ── */
+  .slot-machine {
+    position: relative;
+    margin-bottom: 40px;
+  }
+
+  /* Dark track/rail */
+  .slot-track-outer {
+    background: #0d0d0d;
+    border-radius: 16px;
+    padding: 18px 0;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(212,175,55,0.2);
+    box-shadow:
+      inset 0 0 40px rgba(0,0,0,0.6),
+      0 0 40px rgba(0,0,0,0.4);
+  }
+
+  /* Fade edges */
+  .slot-track-outer::before,
+  .slot-track-outer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 120px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .slot-track-outer::before {
+    left: 0;
+    background: linear-gradient(90deg, #0d0d0d 0%, transparent 100%);
+  }
+
+  .slot-track-outer::after {
+    right: 0;
+    background: linear-gradient(270deg, #0d0d0d 0%, transparent 100%);
+  }
+
+  /* Center pointer / selector */
+  .slot-pointer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 106px;
+    border: 3px solid var(--gold);
+    border-radius: 12px;
+    z-index: 20;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 1px rgba(212,175,55,0.2),
+      0 0 20px rgba(212,175,55,0.3),
+      inset 0 0 20px rgba(212,175,55,0.05);
+  }
+
+  /* Top/bottom pointer arrows */
+  .slot-pointer::before,
+  .slot-pointer::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+  }
+
+  .slot-pointer::before {
+    top: -14px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 14px solid var(--gold);
+  }
+
+  .slot-pointer::after {
+    bottom: -14px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 14px solid var(--gold);
+  }
+
+  /* Scrolling strip */
+  .slot-strip-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .slot-strip {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px;
+    will-change: transform;
+  }
+
+  /* Each slot tile */
+  .slot-tile {
+    flex-shrink: 0;
+    width: 98px;
+    height: 98px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.06);
+    transition: none;
+    user-select: none;
+  }
+
+  .slot-tile.tile-black {
+    background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .slot-tile.tile-red {
+    background: linear-gradient(145deg, #7a1515, #5a0d0d);
+    border-color: rgba(200,30,30,0.3);
+  }
+
+  .slot-tile.tile-gold {
+    background: linear-gradient(145deg, #5a420a, #3a2a04);
+    border-color: rgba(212,175,55,0.4);
+  }
+
+  .slot-tile.tile-green {
+    background: linear-gradient(145deg, #0f4020, #0a2810);
+    border-color: rgba(61,186,106,0.4);
+  }
+
+  /* Winner highlight */
+  .slot-tile.winner {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 24px rgba(212,175,55,0.6), inset 0 0 20px rgba(212,175,55,0.1);
+  }
+
+  .slot-tile-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+
+  .slot-tile-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .tile-gold .slot-tile-label { color: var(--gold-light); }
+  .tile-green .slot-tile-label { color: #4ade80; }
+
+  /* Inner shadow to give depth to selected tile */
+  .slot-tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Spin controls */
+  .spin-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .spin-result-display {
+    width: 100%;
+    background: var(--green-dark);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .spin-result-display .label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
+  .spin-result-display .value { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--gold-light); letter-spacing: 3px; }
+
+  .spin-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, #b8920a 100%);
+    color: #0a1a0f;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    padding: 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spin-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .spin-btn:hover:not(:disabled) {
+    box-shadow: 0 8px 30px rgba(212,175,55,0.5);
+    transform: translateY(-2px);
+  }
+
+  .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .spin-btn-note {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* Result modal */
+  .result-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+
+  .result-overlay.show { opacity: 1; pointer-events: all; }
+
+  .result-modal {
+    background: var(--green-dark);
+    border: 2px solid rgba(212,175,55,0.4);
+    border-radius: 20px;
+    padding: 52px 48px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: scale(0.8) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-overlay.show .result-modal { transform: scale(1) translateY(0); }
+
+  .result-modal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.12), transparent 60%);
+    pointer-events: none;
+  }
+
+  .result-emoji { font-size: 4.5rem; margin-bottom: 12px; display: block; animation: bounceIn 0.5s ease; }
+
+  @keyframes bounceIn {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .result-label { font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+
+  .result-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .result-msg { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 28px; line-height: 1.5; }
+
+  .result-close {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: var(--green-deep);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 13px 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .result-close:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(212,175,55,0.4); }
+
+  /* confetti */
+  .confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    animation: confettiFall 3s ease-in forwards;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── FEATURED / FIRE SPONSOR ── */
+  .sponsor-card.featured {
+    border-color: rgba(255, 120, 20, 0.5);
+    background: linear-gradient(135deg, #1e1a08, #2a1f04, #1a2a10);
+    position: relative;
+  }
+
+  .sponsor-card.featured::before {
+    background: linear-gradient(90deg, #ff6a00, #ffb347);
+  }
+
+  .sponsor-card.featured::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 12px;
+    padding: 1px;
+    background: linear-gradient(135deg, #ff6a00, #ffb347, #d4af37, #ff6a00);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: fireGlow 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes fireGlow {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1; }
+  }
+
+  .sponsor-card.featured:hover {
+    box-shadow: 0 20px 60px rgba(255,100,0,0.35), 0 0 40px rgba(255,150,0,0.2);
+    transform: translateY(-8px);
+  }
+
+  .fire-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, rgba(255,100,0,0.2), rgba(255,180,0,0.15));
+    border: 1px solid rgba(255,120,0,0.4);
+    color: #ffb347;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    animation: firePulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes firePulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(255,120,0,0.3); }
+    50%       { box-shadow: 0 0 14px rgba(255,120,0,0.6); }
+  }
+  .divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent);
+    margin: 0 48px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(212,175,55,0.1);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+  }
+
+  footer .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  footer p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-logo { font-size: 1.5rem; }
+    .nav-links button { font-size: 0.72rem; padding: 6px 12px; letter-spacing: 0.5px; }
+    .hero { padding: 90px 20px 40px; }
+    .hero-content { grid-template-columns: 1fr; gap: 40px; }
+    .hero-right { order: -1; }
+    .sponsors-section, .leaderboard-section, .roulette-section { padding: 20px 20px 60px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+    .slot-track-outer::before, .slot-track-outer::after { width: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-modal">
+    <span class="result-emoji" id="resultEmoji">🎰</span>
+    <div class="result-label">¡Ganaste!</div>
+    <div class="result-amount" id="resultAmount">$0</div>
+    <p class="result-msg" id="resultMsg">¡Felicitaciones!</p>
+    <button class="result-close" onclick="closeResult()">¡Genial! 🎉</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">CIRO<span>TOP</span></div>
+  <div class="nav-links">
+    <button class="active" onclick="showPage('home', this)">Inicio</button>
+    <button onclick="showPage('leaderboard', this)">Leaderboard</button>
+    <button onclick="showPage('roulette', this)">Ruleta</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════ PAGE 1: HOME ══════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="chips-bg" id="chipsBg"></div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge">Slots Streamer · Kick</div>
+        <h1 class="hero-title">
+          <span class="name">CiroTop</span>
+        </h1>
+        <p class="hero-desc">
+          Slots en vivo, buscando la max y una comunidad increíble.
+        </p>
+        <div class="hero-ctas">
+          <a href="https://kick.com/cirotop" target="_blank" class="btn-primary">▶ Ver en Kick</a>
+          <button class="btn-secondary" onclick="showPage('roulette', document.querySelectorAll('.nav-links button')[2]); setTimeout(initStrip, 60)">🎡 Girá la Ruleta</button>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <!-- Stream card -->
+        <div class="stream-card">
+          <div class="stream-preview">
+            <span class="slots-icon">🎰</span>
+            <div class="live-badge-card">
+              <div class="live-dot"></div>
+              LIVE
+            </div>
+          </div>
+          <div class="stream-info">
+            <div class="stream-info-left">
+              <strong>CiroTop Live Slots</strong>
+              <span>🔴 Transmitiendo en Kick</span>
+            </div>
+            <a href="https://kick.com/cirotop" target="_blank" class="kick-btn">Kick ▸</a>
+          </div>
+        </div>
+
+        <!-- Socials -->
+        <div class="socials-row">
+          <a href="https://kick.com/cirotop" target="_blank" class="social-pill">🟢 Kick</a>
+          <a href="https://discord.gg/cirotop" target="_blank" class="social-pill">💬 Discord</a>
+          <a href="https://www.instagram.com/ciroo.cp" target="_blank" class="social-pill">📸 Instagram</a>
+          <a href="https://www.instagram.com/ciroslots" target="_blank" class="social-pill">🎰 Slots IG</a>
+        </div>
+
+        <!-- Schedule -->
+        <div class="stats-bar">
+          <div class="stat-item" style="grid-column: 1 / -1; display:flex; align-items:center; justify-content:center; gap:12px; padding: 18px 24px;">
+            <span style="font-size:1.4rem;">🔴</span>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--gold-light);">STREAM TODOS LOS DÍAS</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:4px;color:var(--cream);line-height:1;">22:40 HS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SPONSORS -->
+  <section class="sponsors-section">
+    <div class="section-header">
+      <div class="section-tag">♦ Sponsors Oficiales ♦</div>
+      <h2 class="section-title">Mis Casinos de Confianza</h2>
+      <p class="section-subtitle">Usá mi código y aprovechá los mejores bonos exclusivos para la comunidad CiroTop</p>
+    </div>
+
+    <div class="sponsors-grid">
+
+      <!-- ODINBET -->
+      <div class="sponsor-card featured" onclick="window.open('https://odinbet.com/r/CiroTop/signup','_blank')">
+        <div class="sponsor-logo-area">
+          <div class="sponsor-logo">ODINBET</div>
+          <span class="fire-badge">🔥 DESTACADO</span>
+        </div>
+        <div class="sponsor-promo">
+          <div class="sponsor-promo-label">🎁 Bonus Exclusivo</div>
+          <div class="sponsor-promo-text">15 USD GRATIS al registrarte + 10% Cashback</div>
+        </div>
+        <div class="sponsor-code-row">
+          <div>
+            <div class="code-label">Tu código</div>
+            <div class="code-value">CIROTOP</div>
+          </div>
+          <button class="copy-btn" onclick="copyCode(event, 'CIROTOP')">COPIAR</button>
+        </div>
+        <button class="sponsor-cta-btn" onclick="event.stopPropagation();window.open('https://odinbet.com/r/CiroTop/signup','_blank')">Registrarme en OdinBet ▸</button>
+      </div>
+
+      <!-- BSITE -->
+      <div class="sponsor-card featured" onclick="window.open('https://b.site/r/cirotop','_blank')">
+        <div class="sponsor-logo-area">
+          <div class="sponsor-logo">BSITE</div>
+          <span class="fire-badge">🔥 DESTACADO</span>
+        </div>
+        <div class="sponsor-promo">
+          <div class="sponsor-promo-label">🎁 Bonus Exclusivo</div>
+          <div class="sponsor-promo-text">3 Cajas Gratis + 3% Bonus en Depósitos</div>
+        </div>
+        <div class="sponsor-code-row">
+          <div>
+            <div class="code-label">Tu código</div>
+            <div class="code-value">CIROTOP</div>
+          </div>
+          <button class="copy-btn" onclick="copyCode(event, 'CIROTOP')">COPIAR</button>
+        </div>
+        <button class="sponsor-cta-btn" onclick="event.stopPropagation();window.open('https://b.site/r/cirotop','_blank')">Registrarme en BSite ▸</button>
+      </div>
+
+      <!-- QZINO -->
+      <div class="sponsor-card featured" onclick="window.open('https://qzino-partners.com/trholklf4','_blank')">
+        <div class="sponsor-logo-area">
+          <div class="sponsor-logo">QZINO</div>
+          <span class="fire-badge">🔥 DESTACADO</span>
+        </div>
+        <div class="sponsor-promo">
+          <div class="sponsor-promo-label">🎁 Bonus Exclusivo</div>
+          <div class="sponsor-promo-text">370% Bono de Bienvenida</div>
+        </div>
+        <div class="sponsor-code-row">
+          <div>
+            <div class="code-label">Tu código</div>
+            <div class="code-value">CIROTOP</div>
+          </div>
+          <button class="copy-btn" onclick="copyCode(event, 'CIROTOP')">COPIAR</button>
+        </div>
+        <button class="sponsor-cta-btn" onclick="event.stopPropagation();window.open('https://qzino-partners.com/trholklf4','_blank')">Registrarme en Qzino ▸</button>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="logo">CIROTOP</div>
+    <p>© 2025 CiroTop · Slots Streamer en Kick</p>
+    <p style="font-size:0.7rem;color:var(--text-muted)">+18 · Juego responsable</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════ PAGE 2: LEADERBOARD ══════════════════════ -->
+<div class="page" id="page-leaderboard">
+
+  <div class="page-header">
+    <div class="page-header-tag">♠ Rankings ♠</div>
+    <h1>Leaderboards</h1>
+    <p>Los jugadores más activos de la comunidad CiroTop compitiendo por premios reales</p>
+  </div>
+
+  <div class="leaderboard-section">
+
+    <div class="casino-tabs">
+      <button class="casino-tab active" id="bsiteTab">🎰 BSite — Live</button>
+      <button class="casino-tab" style="opacity:0.5;cursor:default">Más casinos (próximamente)</button>
+    </div>
+
+    <div class="my-rank-banner">
+      <div>
+        <div class="label">Participantes totales</div>
+        <div class="value" id="lbTotalParticipants">Cargando...</div>
+      </div>
+      <a href="https://kick.com/cirotop" target="_blank" class="kick-btn">Seguirme en Kick</a>
+    </div>
+
+    <!-- Loading state -->
+    <div id="lbLoading" class="leaderboard-card" style="padding:60px;text-align:center;">
+      <div style="font-size:2rem;margin-bottom:12px;animation:pulse 1.5s infinite;">🎰</div>
+      <div style="color:var(--text-muted);letter-spacing:2px;font-size:0.85rem;text-transform:uppercase;">Cargando datos en vivo...</div>
+    </div>
+
+    <!-- Error state -->
+    <div id="lbError" class="leaderboard-card" style="padding:60px;text-align:center;display:none;">
+      <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+      <div style="color:var(--text-muted);font-size:0.9rem;" id="lbErrorMsg">No se pudieron cargar los datos</div>
+      <button onclick="loadLeaderboard()" style="margin-top:16px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--gold);padding:8px 20px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;">Reintentar</button>
+    </div>
+
+    <!-- Dynamic leaderboard -->
+    <div id="lbCard" class="leaderboard-card" style="display:none;">
+      <div class="lb-header">
+        <div class="lb-header-left">
+          <h3 id="lbName">BSite Wager Race</h3>
+          <p id="lbPeriod">Cargando período...</p>
+        </div>
+        <div class="lb-prize-pool">
+          <div class="amount" id="lbPrizePool">—</div>
+          <div class="label">Prize Pool Total</div>
+        </div>
+      </div>
+
+      <div class="lb-cols">
+        <span>#</span>
+        <span>Jugador</span>
+        <span>Apostado</span>
+        <span style="text-align:right">Premio</span>
+      </div>
+
+      <div id="lbRows"></div>
+
+      <div class="lb-footer">
+        <div class="lb-footer-timer">
+          ⏱ Termina en: <span class="timer-val" id="lbTimer">--:--:--</span>
+        </div>
+        <span id="lbStatusBadge" style="color:var(--green-bright);font-weight:600;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;">● LIVE</span>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="logo">CIROTOP</div>
+    <p>© 2025 CiroTop · Slots Streamer en Kick</p>
+    <p style="font-size:0.7rem;color:var(--text-muted)">+18 · Juego responsable</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════ PAGE 3: ROULETTE ══════════════════════ -->
+<div class="page" id="page-roulette">
+
+  <div class="page-header">
+    <div class="page-header-tag">♣ Premios ♣</div>
+    <h1>La Ruleta de CiroTop</h1>
+    <p>Suscribite al canal en Kick y yo giro la ruleta en vivo para vos</p>
+  </div>
+
+  <div class="roulette-section">
+
+    <!-- Odds toggle -->
+    <div class="odds-toggle-row">
+      <button class="odds-toggle-btn" onclick="toggleOdds()" id="oddsBtn">
+        🎲 Ver probabilidades
+      </button>
+    </div>
+
+    <!-- Hidden odds panel -->
+    <div class="odds-panel" id="oddsPanel">
+      <div class="odds-panel-title">♠ Tabla de probabilidades</div>
+      <div class="odds-grid">
+        <div class="odds-item">
+          <div class="odds-dot" style="background:#2a2a2a;border:1px solid #555;"></div>
+          <span class="odds-label">$1</span>
+          <span class="odds-pct">90%</span>
+        </div>
+        <div class="odds-item">
+          <div class="odds-dot" style="background:#7a1515;"></div>
+          <span class="odds-label">$5</span>
+          <span class="odds-pct">5%</span>
+        </div>
+        <div class="odds-item">
+          <div class="odds-dot" style="background:#444;"></div>
+          <span class="odds-label">$10</span>
+          <span class="odds-pct">3.5%</span>
+        </div>
+        <div class="odds-item">
+          <div class="odds-dot" style="background:#5a420a;"></div>
+          <span class="odds-label" style="color:var(--gold)">$25</span>
+          <span class="odds-pct">1.49%</span>
+        </div>
+        <div class="odds-item">
+          <div class="odds-dot" style="background:#0f4020;"></div>
+          <span class="odds-label" style="color:#4ade80">$100</span>
+          <span class="odds-pct">0.01%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slot strip machine -->
+    <div class="slot-machine">
+      <div class="slot-track-outer">
+        <div class="slot-pointer" id="slotPointer"></div>
+        <div class="slot-strip-wrapper">
+          <div class="slot-strip" id="slotStrip"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="spin-controls">
+      <div class="spin-result-display">
+        <div>
+          <div class="label">Resultado</div>
+          <div class="value" id="spinResult">Esperando giro...</div>
+        </div>
+        <div style="font-size:2rem;opacity:0.3;" id="spinResultIcon">🎰</div>
+      </div>
+
+      <button class="spin-btn" id="spinBtn" onclick="spinStrip()">
+        🎰 &nbsp;GIRAR
+      </button>
+
+      <p class="spin-btn-note">Solo CiroTop gira la ruleta en stream · Esta demo muestra cómo funciona</p>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="logo">CIROTOP</div>
+    <p>© 2025 CiroTop · Slots Streamer en Kick</p>
+    <p style="font-size:0.7rem;color:var(--text-muted)">+18 · Juego responsable</p>
+  </footer>
+</div>
+
+<script>
+  // ── PAGE NAVIGATION ──
+  function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo(0, 0);
+    if (id === 'leaderboard') loadLeaderboard();
+  }
+
+  // ── COPY CODE ──
+  function copyCode(e, code) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = e.target;
+      btn.textContent = '✓ COPIADO';
+      btn.style.background = 'rgba(61,186,106,0.2)';
+      btn.style.color = '#3dba6a';
+      setTimeout(() => {
+        btn.textContent = 'COPIAR';
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2000);
+    });
+  }
+
+  // ── FLOATING CHIPS ──
+  const chipsBg = document.getElementById('chipsBg');
+  const chipColors = ['#d4af37', '#3dba6a', '#2a7a45', '#f0d060'];
+  for (let i = 0; i < 12; i++) {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    const size = Math.random() * 60 + 20;
+    chip.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${Math.random() * 100}%;
+      border-color: ${chipColors[Math.floor(Math.random() * chipColors.length)]};
+      animation-duration: ${Math.random() * 15 + 8}s;
+      animation-delay: ${Math.random() * 10}s;
+    `;
+    chipsBg.appendChild(chip);
+  }
+
+  // ══════════════════════════════════════
+  // BSITE LEADERBOARD API
+  // ══════════════════════════════════════
+  const BSITE_API_KEY = '3fc4b0c9-b5ca-4a3d-92b8-5f494e1df5ba';
+
+  let lbEndTime = null;
+
+  function formatDate(tsMs) {
+    const d = new Date(Number(tsMs));
+    return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  function formatMoney(v) {
+    return '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function getRankClass(rank) {
+    if (rank === 1) return 'rank-1';
+    if (rank === 2) return 'rank-2';
+    if (rank === 3) return 'rank-3';
+    return 'rank-other';
+  }
+
+  function getRowClass(rank) {
+    return rank === 1 ? 'lb-row rank-1-row' : 'lb-row';
+  }
+
+  function getInitials(username) {
+    if (!username) return '?';
+    const clean = username.replace(/\.*$/, '');
+    return clean.slice(0, 2).toUpperCase();
+  }
+
+  async function loadLeaderboard() {
+    document.getElementById('lbLoading').style.display = 'block';
+    document.getElementById('lbError').style.display = 'none';
+    document.getElementById('lbCard').style.display = 'none';
+
+    try {
+      const res = await fetch('https://api.b.site/leaderboard/connect-by-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Referer': 'b.site'
+        },
+        body: JSON.stringify({ apiKey: BSITE_API_KEY })
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error('API returned error');
+
+      renderLeaderboard(data);
+    } catch (err) {
+      document.getElementById('lbLoading').style.display = 'none';
+      document.getElementById('lbError').style.display = 'block';
+      document.getElementById('lbErrorMsg').textContent = `Error al cargar datos: ${err.message}`;
+    }
+  }
+
+  function renderLeaderboard(data) {
+    const lb = data.leaderboard;
+    const entry = data.currentEntry;
+    const wagers = data.wagers || [];
+    const rewards = lb.leaderboardRewards || [];
+
+    // Header
+    document.getElementById('lbName').textContent = lb.name + ' · Wager Race';
+    document.getElementById('lbPeriod').textContent =
+      `Período: ${formatDate(entry.start)} — ${formatDate(entry.end)}`;
+
+    // Prize pool = sum of all rewards
+    const totalPrize = rewards.reduce((s, r) => s + (r.winnings || 0), 0);
+    document.getElementById('lbPrizePool').textContent = formatMoney(totalPrize);
+
+    // Participants
+    document.getElementById('lbTotalParticipants').textContent =
+      data.totalParticipants > 0 ? data.totalParticipants + ' participantes' : wagers.length + ' en ranking';
+
+    // Status badge
+    const statusEl = document.getElementById('lbStatusBadge');
+    if (entry.status === 'active') {
+      statusEl.textContent = '● LIVE';
+      statusEl.style.color = 'var(--green-bright)';
+    } else if (entry.status === 'pending') {
+      statusEl.textContent = '⏳ PENDIENTE';
+      statusEl.style.color = 'var(--gold)';
+    } else {
+      statusEl.textContent = entry.status.toUpperCase();
+      statusEl.style.color = 'var(--text-muted)';
+    }
+
+    // Timer
+    lbEndTime = Number(entry.end);
+
+    // Build a reward map by place
+    const rewardMap = {};
+    rewards.forEach(r => { rewardMap[r.place] = r.winnings; });
+
+    // Rows
+    const container = document.getElementById('lbRows');
+    container.innerHTML = '';
+
+    if (wagers.length === 0) {
+      container.innerHTML = `
+        <div style="padding:48px;text-align:center;color:var(--text-muted);">
+          <div style="font-size:2rem;margin-bottom:12px;">🎰</div>
+          <div style="font-size:0.9rem;">Aún no hay jugadores en el ranking.<br>¡Sé el primero!</div>
+        </div>`;
+    } else {
+      wagers.forEach((player, idx) => {
+        const rank = player.rank;
+        const prize = rewardMap[rank];
+        const rankClass = getRankClass(rank);
+        const rowClass = getRowClass(rank);
+        const initials = getInitials(player.username);
+
+        const row = document.createElement('div');
+        row.className = rowClass;
+        row.innerHTML = `
+          <span class="lb-rank ${rankClass}">${rank}</span>
+          <div class="lb-player">
+            <div class="player-avatar">${initials}</div>
+            <div>
+              <div class="player-name">${player.username}</div>
+              <div class="player-bets">Apostado total</div>
+            </div>
+          </div>
+          <span class="lb-wagered">${formatMoney(player.wager)}</span>
+          <span class="lb-prize" style="text-align:right">${prize ? formatMoney(prize) : '—'}</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    document.getElementById('lbLoading').style.display = 'none';
+    document.getElementById('lbCard').style.display = 'block';
+  }
+
+  // Countdown timer using lbEndTime
+  function updateLbTimer() {
+    const el = document.getElementById('lbTimer');
+    if (!el || !lbEndTime) return;
+    const diff = lbEndTime - Date.now();
+    if (diff <= 0) { el.textContent = 'FINALIZADO'; return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (d > 0) el.textContent = `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    else el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  setInterval(updateLbTimer, 1000);
+
+  // ══════════════════════════════════════
+  // SLOT STRIP ROULETTE
+  // ══════════════════════════════════════
+
+  const PRIZES = [
+    { label: '$1',   icon: '💵', tileClass: 'tile-black', weight: 90,   emoji: '💵' },
+    { label: '$5',   icon: '🔴', tileClass: 'tile-red',   weight: 5,    emoji: '🔴' },
+    { label: '$10',  icon: '⬛', tileClass: 'tile-black', weight: 3.5,  emoji: '⬛' },
+    { label: '$25',  icon: '⭐', tileClass: 'tile-gold',  weight: 1.49, emoji: '⭐' },
+    { label: '$100', icon: '🍀', tileClass: 'tile-green', weight: 0.01, emoji: '🍀' },
+  ];
+
+  const TILE_SIZE = 98;  // matches CSS width
+  const TILE_GAP  = 8;   // matches CSS gap
+  const TILE_STEP = TILE_SIZE + TILE_GAP; // 106px per tile
+
+  const totalW = PRIZES.reduce((s, p) => s + p.weight, 0);
+
+  let isSpinning = false;
+  // domTiles[i] = the prize at DOM index i
+  let domTiles = [];
+  // centerDomIdx = which DOM index is currently centered under the pointer
+  let centerDomIdx = 0;
+
+  const strip = document.getElementById('slotStrip');
+
+  function weightedRandom() {
+    const r = Math.random() * totalW;
+    let cum = 0;
+    for (const p of PRIZES) { cum += p.weight; if (r < cum) return p; }
+    return PRIZES[0];
+  }
+
+  function createTileEl(prize) {
+    const div = document.createElement('div');
+    div.className = `slot-tile ${prize.tileClass}`;
+    div.innerHTML = `<span class="slot-tile-icon">${prize.icon}</span><span class="slot-tile-label">${prize.label}</span>`;
+    return div;
+  }
+
+  // Returns the translateX so that DOM index `idx` is centered in the container
+  function offsetForIdx(idx) {
+    const containerW = document.querySelector('.slot-track-outer').offsetWidth;
+    // strip has padding-left: 16px in CSS. Account for it.
+    const stripPad = 16;
+    // Center of container
+    const containerCenter = containerW / 2;
+    // Left edge of tile[idx] relative to strip start (after padding)
+    const tileLeft = stripPad + idx * TILE_STEP;
+    // Center of tile[idx]
+    const tileCenter = tileLeft + TILE_SIZE / 2;
+    // We need: stripOffset + tileCenter = containerCenter
+    return containerCenter - tileCenter;
+  }
+
+  function buildStripDOM() {
+    strip.innerHTML = '';
+    strip.style.transition = 'none';
+    domTiles = [];
+
+    // Fill with 13 initial tiles (enough to fill visible area)
+    for (let i = 0; i < 13; i++) {
+      const p = weightedRandom();
+      domTiles.push(p);
+      strip.appendChild(createTileEl(p));
+    }
+
+    // Center on tile index 6 (middle of 13)
+    centerDomIdx = 6;
+    const offset = offsetForIdx(centerDomIdx);
+    strip.style.transform = `translateX(${offset}px)`;
+    highlightCenter();
+  }
+
+  function highlightCenter() {
+    const tiles = strip.querySelectorAll('.slot-tile');
+    tiles.forEach(t => t.classList.remove('winner'));
+    if (tiles[centerDomIdx]) tiles[centerDomIdx].classList.add('winner');
+  }
+
+  function spinStrip() {
+    if (isSpinning) return;
+    isSpinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinResult').textContent = 'Girando...';
+    document.getElementById('spinResultIcon').textContent = '🎰';
+    strip.querySelectorAll('.slot-tile').forEach(t => t.classList.remove('winner'));
+
+    const winner = weightedRandom();
+
+    // How many tiles to scroll past (the "spin" distance)
+    const spinTiles = 35 + Math.floor(Math.random() * 15);
+
+    // Append spinTiles new tiles. The LAST one is always the winner.
+    for (let i = 0; i < spinTiles; i++) {
+      const p = (i === spinTiles - 1) ? winner : weightedRandom();
+      domTiles.push(p);
+      strip.appendChild(createTileEl(p));
+    }
+
+    // The new center is the last appended tile
+    const newCenterIdx = domTiles.length - 1;
+
+    // Calculate final offset
+    const finalOffset = offsetForIdx(newCenterIdx);
+
+    const duration = 3800 + Math.random() * 800;
+
+    // Disable transition first, then re-enable with animation
+    strip.style.transition = 'none';
+    void strip.offsetHeight; // force reflow
+
+    strip.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.85, 0.25, 1.0)`;
+    strip.style.transform = `translateX(${finalOffset}px)`;
+
+    setTimeout(() => {
+      centerDomIdx = newCenterIdx;
+      isSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      document.getElementById('spinResult').textContent = winner.label;
+      document.getElementById('spinResultIcon').textContent = winner.emoji;
+      highlightCenter();
+      showResult(winner);
+
+      // Cleanup: remove tiles far to the left, adjust centerDomIdx accordingly
+      setTimeout(() => {
+        const tiles = strip.querySelectorAll('.slot-tile');
+        const keepFrom = Math.max(0, centerDomIdx - 10);
+        for (let i = 0; i < keepFrom; i++) {
+          if (tiles[i]) tiles[i].remove();
+        }
+        domTiles = domTiles.slice(keepFrom);
+        centerDomIdx -= keepFrom;
+        // Snap position without animation
+        strip.style.transition = 'none';
+        strip.style.transform = `translateX(${offsetForIdx(centerDomIdx)}px)`;
+      }, 600);
+
+    }, duration + 50);
+  }
+
+  function toggleOdds() {
+    const panel = document.getElementById('oddsPanel');
+    const btn = document.getElementById('oddsBtn');
+    const visible = panel.classList.toggle('visible');
+    btn.textContent = visible ? '🙈 Ocultar probabilidades' : '🎲 Ver probabilidades';
+  }
+
+  // Init strip when roulette page is shown
+  let stripBuilt = false;
+  function initStrip() {
+    if (stripBuilt) return;
+    stripBuilt = true;
+    buildStripDOM();
+  }
+
+  // Init strip when roulette tab is clicked
+  document.querySelectorAll('.nav-links button')[2].addEventListener('click', () => {
+    setTimeout(initStrip, 50);
+  });
+
+  function showResult(prize) {
+    const msgs = {
+      '$1':   '¡Gracias por suscribirte! Seguí apostando 🎰',
+      '$5':   '¡Buen premio! La comunidad manda 💪',
+      '$10':  '¡Excelente! Diez dólares para vos 🎊',
+      '$25':  '¡GRANDE! ¡Veinticinco verdes! 🏆',
+      '$100': '🚨 ¡JACKPOT! ¡CIEN DÓLARES! ¡HISTÓRICO! 🚨'
+    };
+    document.getElementById('resultEmoji').textContent = prize.emoji || '🎰';
+    document.getElementById('resultAmount').textContent = prize.label;
+    document.getElementById('resultMsg').textContent = msgs[prize.label] || '¡Felicitaciones!';
+    document.getElementById('resultOverlay').classList.add('show');
+    if (prize.label !== '$1') launchConfetti();
+  }
+
+  function closeResult() {
+    document.getElementById('resultOverlay').classList.remove('show');
+  }
+
+  function launchConfetti() {
+    const colors = ['#d4af37', '#3dba6a', '#f0d060', '#ef4444', '#53fc18', '#4ade80'];
+    for (let i = 0; i < 90; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const size = Math.random() * 10 + 5;
+      piece.style.cssText = `
+        left: ${Math.random() * 100}vw;
+        top: 0;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-delay: ${Math.random() * 0.6}s;
+        animation-duration: ${Math.random() * 1.5 + 2.5}s;
+      `;
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }
+  }
+</script>
+</body>
+</html>
