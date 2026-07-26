@@ -1,0 +1,114 @@
+{
+  "type": "casebattle",
+  "archivedAt": "2026-07-26T23:52:42.587Z",
+  "periodEnd": "2026-07-26T23:52:42.586Z",
+  "periodStart": null,
+  "prizePool": null,
+  "users": [
+    {
+      "rank": 1,
+      "username": "ElMati",
+      "avatar": "https://cdn.casebattle.com/avatars/c6929e9e-ec4d-4964-839d-8442b7e868c1.webp",
+      "wager": 1497.4906,
+      "prize": null
+    },
+    {
+      "rank": 2,
+      "username": "gaycat",
+      "avatar": "https://cdn.casebattle.com/avatars/3ab37083-7bd1-430b-805d-f25ef89810f9.webp",
+      "wager": 1465.858862,
+      "prize": null
+    },
+    {
+      "rank": 3,
+      "username": "Joaqo",
+      "avatar": "https://cdn.casebattle.com/avatars/e966b4c9-6b81-494b-9a45-9f35df633b5e.webp",
+      "wager": 428.325,
+      "prize": null
+    },
+    {
+      "rank": 4,
+      "username": "Anaaaaaaaa",
+      "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLkgH3gW3GjZXKYxhZzP9d2Z_vxrczjDdGfeqMFYOVH1HQNhQ=s96-c",
+      "wager": 269.2536,
+      "prize": null
+    },
+    {
+      "rank": 5,
+      "username": "Reach",
+      "avatar": "https://cdn.casebattle.com/avatars/0bdb9fe5-c88d-4ed2-afa5-f0d2fe08a174.webp",
+      "wager": 187.242424,
+      "prize": null
+    },
+    {
+      "rank": 6,
+      "username": "PROTH3X",
+      "avatar": "https://avatars.steamstatic.com/704fcd79e4f39bbe2ca0c85bed4d6f18b16cf1c1_full.jpg",
+      "wager": 142.9062,
+      "prize": null
+    },
+    {
+      "rank": 7,
+      "username": "Chagagol",
+      "avatar": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=01kx4qsedjfehsnx3zh306zjav",
+      "wager": 58.3872,
+      "prize": null
+    },
+    {
+      "rank": 8,
+      "username": "Michotito",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=01kx4y6vxq5q7m8dtcjcab4nt2",
+      "wager": 28.06,
+      "prize": null
+    },
+    {
+      "rank": 9,
+      "username": "Whitx24",
+      "avatar": "https://api.dicebear.com/9.x/big-ears-neutral/svg?seed=01ky19efjrnpmhfxysvkgfyww5",
+      "wager": 20.322,
+      "prize": null
+    },
+    {
+      "rank": 10,
+      "username": "Titiconti",
+      "avatar": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=01kx4y295e2emya4kz6af7z6c6",
+      "wager": 19.2425,
+      "prize": null
+    },
+    {
+      "rank": 11,
+      "username": "autodromo123",
+      "avatar": "https://api.dicebear.com/9.x/big-ears-neutral/svg?seed=01kpjzxn2fmhezkjabfxx1k23x",
+      "wager": 11.36,
+      "prize": null
+    },
+    {
+      "rank": 12,
+      "username": "danicastanon",
+      "avatar": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=01kx4v3v0zpy9jtpft13db9gtx",
+      "wager": 10.86,
+      "prize": null
+    },
+    {
+      "rank": 13,
+      "username": "matucho",
+      "avatar": "https://api.dicebear.com/9.x/big-ears-neutral/svg?seed=01kx4rjkspwsq7qy16ztjfe1zz",
+      "wager": 5,
+      "prize": null
+    },
+    {
+      "rank": 14,
+      "username": "joff03",
+      "avatar": "https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=01kybhz3a7m523788rq9w2m1zj",
+      "wager": 4.9056,
+      "prize": null
+    },
+    {
+      "rank": 15,
+      "username": "23santi",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?seed=01kx4ys4qrz6h95nypt24yfjwg",
+      "wager": 4.5,
+      "prize": null
+    }
+  ]
+}
